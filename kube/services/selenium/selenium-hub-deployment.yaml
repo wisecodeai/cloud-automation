@@ -11,6 +11,11 @@ spec:
     matchLabels:
       app: selenium-hub
   template:
+    annotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+      prometheus.io/path: /metrics
+      prometheus.io/port: "8080"
+      prometheus.io/scrape: "true"
     metadata:
       labels:
         app: selenium-hub
@@ -50,4 +55,9 @@ spec:
           periodSeconds: 10
           successThreshold: 1
           timeoutSeconds: 5      
+      - name: selenium-grid-exporter
+        GEN3_SELENIUM_GRID_EXPORTER_IMAGE|-image: registry.hub.docker.com/wakeful/selenium-grid-exporter-|
+        args: ["-scrape-uri", "http://127.0.0.1:4444/status"]
+        ports:
+        - containerPort: 8080
       terminationGracePeriodSeconds: 30
