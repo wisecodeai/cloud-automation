@@ -30,6 +30,8 @@ spec:
           GEN3_AWSHELPER_IMAGE|-image: quay.io/cdis/awshelper:master-|
           imagePullPolicy: Always
           env:
+            - name: prometheus_multiproc_dir
+              value: /tmp
             - name: gen3Env
               valueFrom:
                 configMapKeyRef:

@@ -69,6 +69,8 @@ spec:
         image: quay.io/cdis/data-simulator:master
         imagePullPolicy: Always
         env:
+          - name: prometheus_multiproc_dir
+            value: /tmp
           - name: PYTHONPATH
             value: /var/www/fence
           - name: DICTIONARY_URL

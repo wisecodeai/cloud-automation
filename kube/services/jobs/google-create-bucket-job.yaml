@@ -99,6 +99,8 @@ spec:
             GEN3_PROJECT_AUTH_ID
           - name: ACCESS_LOGS_BUCKET
             GEN3_ACCESS_LOGS_BUCKET
+          - name: prometheus_multiproc_dir
+            value: /tmp
           - name: FENCE_PUBLIC_CONFIG
             valueFrom:
               configMapKeyRef:

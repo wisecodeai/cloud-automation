@@ -52,6 +52,8 @@ spec:
               GEN3_FIELD_NAME|-value: ""-|
             - name: ADD
               GEN3_ADD|-value: ""-|
+            - name: prometheus_multiproc_dir
+              value: /tmp
             - name: FENCE_PUBLIC_CONFIG
               valueFrom:
                 configMapKeyRef:
