@@ -20,7 +20,7 @@ saName=$(echo "${prefix}-sa")
 # @param manifest: a manifest (tsv) of files to replicate. Required colums: project_id, url
 # @param mapping: a json file that maps project_id to target bucket
 #
-gen3_create_aws_batch() {
+gen3_dcf_create_aws_batch() {
   if [[ $# -lt 3 ]]; then
     gen3_log_info "Invalid format, should be: gen3 dcf-bucket-replicate --bucket BUCKET --manifest MANIFEST --mapping MAPPING"
     exit 1
@@ -48,8 +48,8 @@ gen3_create_aws_batch() {
 
   local accountId=$(gen3_aws_run aws sts get-caller-identity | jq -r .Account)
 
-  mkdir -p $(gen3_secrets_folder)/g3auto/bucketreplicate/
-  credsFile="$(gen3_secrets_folder)/g3auto/bucketreplicate/creds.json"
+  mkdir -p $(gen3_secrets_folder)/g3auto/dcfbucketreplicate/
+  credsFile="$(gen3_secrets_folder)/g3auto/dcfbucketreplicate/creds.json"
   cat - > "$credsFile" <<EOM
 {
   "region": "us-east-1",
@@ -57,7 +57,7 @@ gen3_create_aws_batch() {
   "aws_secret_access_key": "$secret_key"
 }
 EOM
-  gen3 secrets sync "initialize bucketreplicate/creds.json"
+  gen3 secrets sync "initialize dcfbucketreplicate/creds.json"
 
   cat << EOF > ${prefix}-job-definition.json
 {
@@ -128,8 +128,8 @@ EOF
   gen3 iam-serviceaccount -c $saName -p sa.json
 
   # Run k8s jobs to submitting jobs
-  gen3 gitops filter $HOME/cloud-automation/kube/services/jobs/bucket-replication-job.yaml SOURCE_BUCKET $source_bucket DESTINATION_BUCKET $destination_bucket JOB_QUEUE $job_queue JOB_DEFINITION $job_definition | sed "s|sa-#SA_NAME_PLACEHOLDER#|$saName|g" | sed "s|bucket-replication#PLACEHOLDER#|bucket-replication-${jobId}|g" | tee $HOME/cloud-automation/kube/services/jobs/bucket-replication-${jobId}-job.yaml
-  gen3 job run bucket-replication-${jobId}
+  gen3 gitops filter $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-job.yaml SOURCE_BUCKET $source_bucket DESTINATION_BUCKET $destination_bucket JOB_QUEUE $job_queue JOB_DEFINITION $job_definition | sed "s|sa-#SA_NAME_PLACEHOLDER#|$saName|g" | sed "s|dcf-bucket-replication#PLACEHOLDER#|dcf-bucket-replication-${jobId}|g" | tee $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-${jobId}-job.yaml
+  gen3 job run dcf-bucket-replication-${jobId}
   gen3_log_info "The job is started. Job ID: ${jobId}"
 
 }
@@ -138,29 +138,33 @@ EOF
 #
 # @param job-id
 #
-gen3_replicate_generating_status() {
-  gen3_log_info "Please use kubectl logs -f bucket-replicate-{jobid}-xxx command"
+gen3_dcf_replicate_generating_status() {
+  gen3_log_info "Please use kubectl logs -f dcf-bucket-replicate-{jobid}-xxx command"
 }
 
 
 # Show help
-gen3_bucket_replicate_help() {
-  gen3 help bucket-replicate
+gen3_dcf_bucket_replicate_help() {
+  gen3 help dcf-bucket-replicate
 }
 
 # function to list all jobs
-gen3_bucket_replicate_list() {
+gen3_dcf_bucket_replicate_list() {
   local search_dir="$HOME/.local/share/gen3/default"
   for entry in `ls $search_dir`; do
     if [[ $entry == *"__batch" ]]; then
-      jobid=$(echo $entry | sed -n "s/^.*-\(\S*\)__batch$/\1/p")
-      echo $jobid
+      # jobid=$(echo $entry | sed -n "s/^.*-\(\S*\)__batch$/\1/p")
+      # echo $jobid
+      jobid=$(echo $entry | sed -n "s/${hostname//./-}-bucket-manifest-\(\S*\)__batch$/\1/p")
+      if [[ $jobid != "" ]]; then
+        echo $jobid
+      fi
     fi
   done
 }
 
 # tear down the infrastructure
-gen3_batch_cleanup() {
+gen3_dcf_batch_cleanup() {
   if [[ $# -lt 1 ]]; then
     gen3_log_info "Need to provide a job-id "
     exit 1
@@ -182,7 +186,7 @@ gen3_batch_cleanup() {
     exit 1
   fi
 
-  local prefix="${hostname//./-}-bucket-replicate-${jobId}"
+  local prefix="${hostname//./-}-dcf-bucket-replicate-${jobId}"
   local saName=$(echo "${prefix}-sa" | head -c63)
 
   gen3 workon default ${prefix}__batch
@@ -199,7 +203,7 @@ gen3_batch_cleanup() {
   g3kubectl delete serviceaccount $saName
 
   # Delete creds
-  credsFile="$(gen3_secrets_folder)/g3auto/bucketreplicate/creds.json"
+  credsFile="$(gen3_secrets_folder)/g3auto/dcfbucketreplicate/creds.json"
   rm -f $credsFile
 }
 
@@ -207,22 +211,22 @@ command="$1"
 shift
 case "$command" in
   'create')
-    gen3_create_aws_batch "$@"
+    gen3_dcf_create_aws_batch "$@"
     ;;
   'cleanup')
-    gen3_batch_cleanup "$@"
+    gen3_dcf_batch_cleanup "$@"
     ;;
   'status')
-    gen3_replicate_generating_status
+    gen3_dcf_replicate_generating_status
     ;;
   'list' )
-    gen3_bucket_replicate_list
+    gen3_dcf_bucket_replicate_list
     ;;
   'help')
-    gen3_bucket_replicate_help "$@"
+    gen3_dcf_bucket_replicate_help "$@"
     ;;
   *)
-    gen3_bucket_replicate_help
+    gen3_dcf_bucket_replicate_help
     ;;
 esac
 exit $?

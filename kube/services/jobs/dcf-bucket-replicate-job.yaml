@@ -1,16 +1,17 @@
-# 1. create secret with gen3 kube setup bucket-replicatejob
+# 1. create secret with gen3 kube setup dcf-bucket-replicate job
 # 2. For cross account replications you will need an IAM user with permissions in other accounts. You can also specify another source profile to use.
 # You need to add the access keys to the secrets folder, g3auto/bucketreplicate/credentials, then run gen3 kube-setup-secrets
 # 3. job must invoke with:
-#  gen3 job run bucket-replicate  SOURCE_BUCKET <source-bucket> TARGET_BUCKET <target-bucket> 
+#  gen3 job run dcf-bucket-replicate  SOURCE_BUCKET <source-bucket> MANIFEST <manifest file> MAPPING <mapping file> 
 #  ...optional SOURCE_PROFILE <source-profile> DESTINATION_PROFILE <destination-profile> USE_SOURCE_ACCOUNT
 #####REQUIRED VARIABLE########
 #SOURCE_BUCKET
-#TARGET_BUCKET
+# MANIFEST: a manifest (tsv) of files to replicate. Required colums: project_id, url
+# MAPPING: a json file that maps project_id to target bucket
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: bucket-replicate
+  name: dcf-bucket-replicate
 spec:
   template:
     metadata:
@@ -26,7 +27,7 @@ spec:
           emptyDir: {}
         - name: cred-volume
           secret:
-            secretName: "bucketreplicate-g3auto"
+            secretName: "dcfbucketreplicate-g3auto"
             defaultMode: 0544
       containers:
       - name: replicate
@@ -37,8 +38,10 @@ spec:
         env:
         - name: SOURCE_BUCKET
           GEN3_SOURCE_BUCKET|-value: ""-|
-        - name: DESTINATION_BUCKET
-          GEN3_DESTINATION_BUCKET|-value: ""-|
+        - name: MANIFEST
+          GEN3_MANIFEST|-value: ""-|
+        - name: MAPPING
+          GEN3_MAPPING|-value: ""-|
         - name: SOURCE_PROFILE
           GEN3_SOURCE_PROFILE|-value: "default"-|
         - name: DESTINATION_PROFILE
