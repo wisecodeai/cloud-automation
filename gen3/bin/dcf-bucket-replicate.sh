@@ -21,6 +21,7 @@ saName=$(echo "${prefix}-sa")
 # @param mapping: a json file that maps project_id to target bucket
 #
 gen3_dcf_create_aws_batch() {
+  echo "dcf create"
   if [[ $# -lt 3 ]]; then
     gen3_log_info "Invalid format, should be: gen3 dcf-bucket-replicate --bucket BUCKET --manifest MANIFEST --mapping MAPPING"
     exit 1
@@ -128,7 +129,7 @@ EOF
   gen3 iam-serviceaccount -c $saName -p sa.json
 
   # Run k8s jobs to submitting jobs
-  gen3 gitops filter $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-job.yaml SOURCE_BUCKET $source_bucket DESTINATION_BUCKET $destination_bucket JOB_QUEUE $job_queue JOB_DEFINITION $job_definition | sed "s|sa-#SA_NAME_PLACEHOLDER#|$saName|g" | sed "s|dcf-bucket-replication#PLACEHOLDER#|dcf-bucket-replication-${jobId}|g" | tee $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-${jobId}-job.yaml
+  gen3 gitops filter $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-job.yaml SOURCE_BUCKET $source_bucket MANIFEST $manifest MAPPING $mapping JOB_QUEUE $job_queue JOB_DEFINITION $job_definition | sed "s|sa-#SA_NAME_PLACEHOLDER#|$saName|g" | sed "s|dcf-bucket-replication#PLACEHOLDER#|dcf-bucket-replication-${jobId}|g" | tee $HOME/cloud-automation/kube/services/jobs/dcf-bucket-replication-${jobId}-job.yaml
   gen3 job run dcf-bucket-replication-${jobId}
   gen3_log_info "The job is started. Job ID: ${jobId}"
 
