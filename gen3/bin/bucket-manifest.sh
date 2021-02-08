@@ -195,7 +195,7 @@ EOF
 # @param job-id
 #
 gen3_manifest_generating_status() {
-  pod_name=$(g3kubectl get pod | grep aws-bucket-manifest-$jobid | grep -e Completed -e Running | cut -d' ' -f1)
+  pod_name=$(g3kubectl get pod | grep aws-bucket-manifest-$jobId | grep -e Completed -e Running | cut -d' ' -f1)
   if [[ $? != 0 ]]; then
     gen3_log_err "The job has not been started. Check it again"
     exit 0

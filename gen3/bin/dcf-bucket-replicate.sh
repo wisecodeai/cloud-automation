@@ -21,7 +21,6 @@ saName=$(echo "${prefix}-sa")
 # @param mapping: a json file that maps project_id to target bucket
 #
 gen3_dcf_create_aws_batch() {
-  echo "dcf create"
   if [[ $# -lt 3 ]]; then
     gen3_log_info "Invalid format, should be: gen3 dcf-bucket-replicate --bucket BUCKET --manifest MANIFEST --mapping MAPPING"
     exit 1
@@ -156,7 +155,7 @@ gen3_dcf_bucket_replicate_list() {
     if [[ $entry == *"__batch" ]]; then
       # jobid=$(echo $entry | sed -n "s/^.*-\(\S*\)__batch$/\1/p")
       # echo $jobid
-      jobid=$(echo $entry | sed -n "s/${hostname//./-}-bucket-manifest-\(\S*\)__batch$/\1/p")
+      jobid=$(echo $entry | sed -n "s/${hostname//./-}-dcf-bucket-replicate-\(\S*\)__batch$/\1/p")
       if [[ $jobid != "" ]]; then
         echo $jobid
       fi
@@ -176,7 +175,7 @@ gen3_dcf_batch_cleanup() {
   local is_jobid=0
   for entry in `ls $search_dir`; do
     if [[ $entry == *"__batch" ]]; then
-      item=$(echo $entry | sed -n "s/^.*-\(\S*\)__batch$/\1/p")
+      item=$(echo $entry | sed -n "s/${hostname//./-}-dcf-bucket-replicate-\(\S*\)__batch$/\1/p")
       if [[ "$item" == "$jobId" ]]; then
         is_jobid=1
       fi

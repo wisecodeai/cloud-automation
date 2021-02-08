@@ -15,7 +15,7 @@ spec:
             secretName: "dcfbucketreplicate-g3auto"
       containers:
       - name: aws-dcf-bucket-replicate
-        GEN3_AWS-BUCKET-MANIFEST_IMAGE|-image: quay.io/cdis/dcf-bucket-replicate:master-|
+        GEN3_AWS-BUCKET-MANIFEST_IMAGE|-image: quay.io/cdis/dcf-bucket-replicate:dcf-bucket-duplicate-|
         imagePullPolicy: Always
         ports:
         - containerPort: 80
