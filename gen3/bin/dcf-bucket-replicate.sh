@@ -29,6 +29,8 @@ gen3_dcf_create_aws_batch() {
   manifest=$2
   mapping=$3
   echo $prefix
+  aws s3 cp $mapping s3://${source_bucket}
+  aws s3 cp $manifest s3://${source_bucket}
 
   local job_queue=$(echo "${prefix}_queue_job")
   local job_definition=$(echo "${prefix}-batch_job_definition")
@@ -85,6 +87,8 @@ compute_environment_name     = "${prefix}-compute-env"
 batch_job_queue_name         = "${job_queue}"
 sqs_queue_name               = "${prefix}-batch-job-queue"
 output_bucket_name           = "${temp_bucket}"
+job_id                       = "${jobId}"
+prefix                       = "${prefix}"
 EOF
 
   cat << EOF > sa.json
@@ -139,7 +143,13 @@ EOF
 # @param job-id
 #
 gen3_dcf_replicate_generating_status() {
-  gen3_log_info "Please use kubectl logs -f dcf-bucket-replicate-{jobid}-xxx command"
+  # gen3_log_info "Please use kubectl logs -f dcf-bucket-replicate-{jobid}-xxx command"
+  pod_name=$(g3kubectl get pod | grep dcf-bucket-replication-$1 | grep -e Completed -e Running | cut -d' ' -f1)
+  if [[ $? != 0 ]]; then
+    gen3_log_err "The job has not been started. Check it again"
+    exit 0
+  fi
+  g3kubectl logs -f ${pod_name}
 }
 
 
@@ -217,7 +227,7 @@ case "$command" in
     gen3_dcf_batch_cleanup "$@"
     ;;
   'status')
-    gen3_dcf_replicate_generating_status
+    gen3_dcf_replicate_generating_status "$@"
     ;;
   'list' )
     gen3_dcf_bucket_replicate_list
