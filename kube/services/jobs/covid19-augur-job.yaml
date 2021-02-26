@@ -1,0 +1,46 @@
+# Setup a s3 bucket first `gen3 s3 create $NAME` 
+# Find the bucket write role ARN: 
+# ARN=gen3 s3 info $NAME | jq '."read-write"."policy_arn"'
+# Attach bucket write role to a kubernetes SA
+# kubectl create sa gen3-augur-sa 
+# kubectl annotate sa gen3-augur-sa eks.amazonaws.com/role-arn=$ARN
+# 
+# gen3 gitops filter $HOME/cloud-automation/kube/services/jobs/covid19-augur-job.yaml ACCESS_TOKEN $ACCESS_TOKEN S3_BUCKET $S3_BUCKET | g3kubectl apply -f -
+#   
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: covid19-augur
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: gen3job
+        job: augur
+    spec:
+      serviceAccountName: gen3-augur-s3-sa
+      restartPolicy: Never
+      containers:
+      - name: augur
+        imagePullPolicy: Always
+        GEN3_AUGUR_IMAGE
+        env:
+        - name: ACCESS_TOKEN
+          GEN3_ACCESS_TOKEN|-value: ""-|
+        - name: S3_BUCKET
+          GEN3_S3_BUCKET|-value: ""-|
+        - name: gen3Env
+          valueFrom:
+            configMapKeyRef:
+              name: manifest-global
+              key: hostname
+        - name: slackWebHook
+          valueFrom:
+            configMapKeyRef:
+              name: global
+              key: slack_webhook
+        resources:
+          limits:
+            cpu: 7
+            memory: 62Gi
