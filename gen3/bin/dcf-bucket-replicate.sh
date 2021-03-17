@@ -63,7 +63,7 @@ EOM
 
   cat << EOF > ${prefix}-job-definition.json
 {
-    "image": "quay.io/cdis/dcf-aws-bucket-replicate:dcf-bucket-duplicate:batch_jobs/dcf_bucket_replicate/object_copy_job.sh",
+    "image": "quay.io/cdis/object_copy:master",
     "memory": 256,
     "vcpus": 1,
     "environment": [
