@@ -14,6 +14,8 @@ spec:
         workingDir: /var/sdet_home
         imagePullPolicy: Always
         env:
+          - name: LOG_LEVEL
+            value: "info"
           - name: INDEXD_QUERY_FILTER
             GEN3_INDEXD_QUERY_FILTER|-value: "all"-|
           - name: ACCESS_TOKEN
