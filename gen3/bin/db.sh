@@ -804,6 +804,53 @@ EOM
   return $?
 }
 
+gen3_db_promote() {
+  if [[ $# -lt 2 ]]; then
+    gen3_log_err "gen3_db_promote SERVICE [DESTINATION_NAMESPACE]"
+    return 1
+  fi
+  local service=$1
+  shift 
+  local ns=$1
+  shift
+
+  if (! g3kubectl get ns $ns > /dev/null 2>&1); then
+    gen3_log_err "Namespace $ns doesn't exist"
+    return 1
+  fi
+  local remoteCreds=""
+  if g3kubectl get secret "${service}-creds" -n $ns > /dev/null 2>&1; then
+    # prefer to pull creds from secret
+    remoteCreds=$(g3kubectl get secret "${service}-creds" -n $ns -o json | jq -r '.data["creds.json"]' | base64 --decode)
+  elif g3kubectl get secret "${service}-g3auto"  -n $ns > /dev/null 2>&1 && g3kubectl get secret "${service}-g3auto" -n $ns -ojson | jq -e -r '.data["dbcreds.json"]' > /dev/null 2>&1; then
+    # prefer to pull creds from secret
+    remoteCreds=$(g3kubectl get secret "${service}-g3auto" -n $ns -o json | jq -r '.data["dbcreds.json"]' | base64 --decode)
+  else 
+    gen3_log_err "Unable to obtain credentials for service $service in namespace $ns. Make sure that secret called $service-g3auto or $service-creds exists in the namespace $ns"
+    return 1
+  fi
+  database_name=$(jq -r ".db_database" <<< "$remoteCreds")
+  new_database_name=$database_name"_$(date '+%Y%m%d')"
+  host=$(jq -r ".db_host" <<< "$remoteCreds")
+  
+  #if [ $service = "metadata" ]; then
+  #  username=$(g3kubectl get secret "fence-creds" -n $ns -o json | jq -r '.data["creds.json"]' | base64 --decode | jq -r ".db_username")
+  #  password=$(g3kubectl get secret "fence-creds" -n $ns -o json | jq -r '.data["creds.json"]' | base64 --decode | jq -r ".db_password")
+  #else
+    username=$(jq -r ".db_username" <<< "$remoteCreds")
+    password=$(jq -r ".db_password" <<< "$remoteCreds")
+  #fi
+
+  gen3_log_info "New database will be called $new_database_name"
+  if ( PGPASSWORD="$password" psql -U $username -h $host -l | grep $new_database_name); then
+    #PGPASSWORD="$password" psql -U $username -h $host -d $database_name -c "CREATE DATABASE $new_database_name;"
+    gen3 db backup $service | PGPASSWORD="$password" psql -U $username -h $host -d $new_database_name
+    gen3_log_info "Database for $service has been promoted to $ns namespace. The new database is called $new_database_name. Please update creds.json to use this new db and run gen3 kube-setup-xxx for the services"
+  else 
+    gen3_log_err "DB with name $new_database_name already exists in $host"
+  fi
+}
+
 # main -----------------------------
 
 if [[ -z "$GEN3_SOURCE_ONLY" ]]; then
@@ -832,6 +879,9 @@ if [[ -z "$GEN3_SOURCE_ONLY" ]]; then
       ;;
     "psql")
       gen3_db_psql "$@"
+      ;;
+    "promote")
+      gen3_db_promote "$@"
       ;;
     "reset")
       gen3_db_reset "$@"
