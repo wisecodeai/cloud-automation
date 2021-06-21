@@ -16,6 +16,10 @@ spec:
     type: Recreate
   template:
     metadata:
+      annotations:
+        prometheus.io/path: /prometheus
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
       labels:
         app: jenkins
         # for network policy
