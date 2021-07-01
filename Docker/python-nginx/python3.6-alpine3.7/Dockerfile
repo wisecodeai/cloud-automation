@@ -154,7 +154,10 @@ EXPOSE 80
 EXPOSE 443
 
 # Install uWSGI
-RUN apk add pcre pcre-dev && pip install uwsgi --no-cache-dir
+RUN apk add pcre pcre-dev \
+    && python -m pip install --upgrade pip \
+    && pip install uwsgi --no-cache-dir
+
 
 # Copy the base uWSGI ini file to enable default dynamic uwsgi process number
 COPY uwsgi.ini /etc/uwsgi/
