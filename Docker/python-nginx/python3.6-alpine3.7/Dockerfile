@@ -130,7 +130,6 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 	)" \
 	&& apk add --no-cache --virtual .nginx-rundeps $runDeps \
-	&& apk del .build-deps \
 	&& apk del .gettext \
 	&& mv /tmp/envsubst /usr/local/bin/ \
 	\
@@ -155,8 +154,9 @@ EXPOSE 443
 
 # Install uWSGI
 RUN apk add pcre pcre-dev \
-    && python -m pip install --upgrade pip \
-    && pip install uwsgi --no-cache-dir
+	&& python -m pip install --upgrade pip \
+	&& pip install uwsgi --no-cache-dir \
+	&& apk del .build-deps
 
 
 # Copy the base uWSGI ini file to enable default dynamic uwsgi process number
