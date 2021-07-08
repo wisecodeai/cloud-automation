@@ -35,7 +35,7 @@ alertmanager:
   ## alertmanager container image
   ##
   image:
-    repository: prom/alertmanager
+    repository: quay.io/cdis/alertmanager
     tag: v0.15.3
     pullPolicy: IfNotPresent
 
@@ -256,7 +256,7 @@ configmapReload:
   ## configmap-reload container image
   ##
   image:
-    repository: jimmidyson/configmap-reload
+    repository: quay.io/cdis/configmap-reload
     tag: v0.2.2
     pullPolicy: IfNotPresent
 
@@ -296,7 +296,7 @@ initChownData:
   ## initChownData container image
   ##
   image:
-    repository: busybox
+    repository: quay.io/cdis/busybox
     tag: latest
     pullPolicy: IfNotPresent
 
@@ -406,7 +406,7 @@ nodeExporter:
   ## node-exporter container image
   ##
   image:
-    repository: prom/node-exporter
+    repository: quay.io/cdis/node-exporter
     tag: v0.17.0
     pullPolicy: IfNotPresent
 
@@ -521,7 +521,7 @@ server:
   ## Prometheus server container image
   ##
   image:
-    repository: prom/prometheus
+    repository: quay.io/cdis/prometheus
     tag: v2.7.1
     pullPolicy: IfNotPresent
 
@@ -798,7 +798,7 @@ pushgateway:
   ## pushgateway container image
   ##
   image:
-    repository: prom/pushgateway
+    repository: quay.io/cdis/pushgateway
     tag: v0.6.0
     pullPolicy: IfNotPresent
 
