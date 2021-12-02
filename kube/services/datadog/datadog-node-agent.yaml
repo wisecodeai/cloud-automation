@@ -12,7 +12,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: datadog-agent-installinfo
-  namespace: default
+  namespace: datadog
   labels: {}
   annotations: {}
 data:
@@ -28,7 +28,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: datadog-agent
-  namespace: default
+  namespace: datadog
   labels: {}
 spec:
   selector:
