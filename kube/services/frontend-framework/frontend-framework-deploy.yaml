@@ -51,17 +51,20 @@ spec:
           secretName: "cert-portal-service"
       containers:
       - name: frontend-framework
+          # TODO: this is dev environment specific
         image: quay.io/cdis/heal-landing:init
         readinessProbe:
+          # TODO: this is dev environment specific
           httpGet:
-            path: /
+            path: /landing
             port: 3000
           initialDelaySeconds: 30
           periodSeconds: 60
           timeoutSeconds: 30
         livenessProbe:
+          # TODO: this is dev environment specific
           httpGet:
-            path: /
+            path: /landing
             port: 3000
           initialDelaySeconds: 60
           periodSeconds: 60
@@ -76,6 +79,7 @@ spec:
             memory: 4096Mi
         ports:
         - containerPort: 3000
+          # TODO: this is dev environment specific
         command:
           - npm
           - run
@@ -96,75 +100,75 @@ spec:
                 name: manifest-frontend-framework
                 key: GEN3_BUNDLE
                 optional: true
-          - name: LOGOUT_INACTIVE_USERS
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: logout_inactive_users
-                optional: true
-          - name: WORKSPACE_TIMEOUT_IN_MINUTES
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: workspace_timeout_in_minutes
-                optional: true
-          - name: TIER_ACCESS_LEVEL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                # acceptable values for `tier_access_level` are: `libre`, `regular` and `private`. If omitted, by default common will be treated as `private`
-                key: tier_access_level
-                # for now making it optional so won't break anything
-                optional: true
-          - name: TIER_ACCESS_LIMIT
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: tier_access_limit
-                optional: true
-          - name: FENCE_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: fence_url
-                optional: true
-          - name: INDEXD_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: indexd_url
-                optional: true
-          - name: WORKSPACE_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: workspace_url
-                optional: true
-          - name: MANIFEST_SERVICE_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: manifest_service_url
-                optional: true
-          - name: WTS_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: wts_url
-                optional: true
-          - name: PRIVACY_POLICY_URL
-            valueFrom:
-              configMapKeyRef:
-                name: manifest-global
-                key: privacy_policy_url
-                optional: true
-          - name: MAPBOX_API_TOKEN
-            # Optional token for mapbox api
-            valueFrom:
-              configMapKeyRef:
-                name: global
-                key: mapbox_token
-                optional: true
+          # - name: LOGOUT_INACTIVE_USERS
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: logout_inactive_users
+          #       optional: true
+          # - name: WORKSPACE_TIMEOUT_IN_MINUTES
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: workspace_timeout_in_minutes
+          #       optional: true
+          # - name: TIER_ACCESS_LEVEL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       # acceptable values for `tier_access_level` are: `libre`, `regular` and `private`. If omitted, by default common will be treated as `private`
+          #       key: tier_access_level
+          #       # for now making it optional so won't break anything
+          #       optional: true
+          # - name: TIER_ACCESS_LIMIT
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: tier_access_limit
+          #       optional: true
+          # - name: FENCE_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: fence_url
+          #       optional: true
+          # - name: INDEXD_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: indexd_url
+          #       optional: true
+          # - name: WORKSPACE_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: workspace_url
+          #       optional: true
+          # - name: MANIFEST_SERVICE_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: manifest_service_url
+          #       optional: true
+          # - name: WTS_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: wts_url
+          #       optional: true
+          # - name: PRIVACY_POLICY_URL
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: manifest-global
+          #       key: privacy_policy_url
+          #       optional: true
+          # - name: MAPBOX_API_TOKEN
+          #   # Optional token for mapbox api
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       name: global
+          #       key: mapbox_token
+          #       optional: true
           - name: DATADOG_APPLICATION_ID
             # Optional application ID for Datadog
             valueFrom:
