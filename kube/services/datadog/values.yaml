@@ -10,6 +10,11 @@ datadog:
     useHostPort: true
     nonLocalTraffic: true
 
+  #Enables Optional Universal Service Monitoring
+  ## ref: https://docs.datadoghq.com/tracing/universal_service_monitoring/?tab=helm
+  serviceMonitoring:
+    enabled: false
+
   # datadog.apiKeyExistingSecret -- Use existing Secret which stores API key instead of creating a new one. The value should be set with the `api-key` key inside the secret.
   ## If set, this parameter takes precedence over "apiKey".
   apiKeyExistingSecret:  "datadog-agent"
@@ -72,18 +77,25 @@ datadog:
 
     # datadog.processAgent.processCollection -- Set this to true to enable process collection in process monitoring agent
     ## Requires processAgent.enabled to be set to true to have any effect
-    processCollection: false
+    processCollection: true
 
     # datadog.processAgent.stripProcessArguments -- Set this to scrub all arguments from collected processes
     ## Requires processAgent.enabled and processAgent.processCollection to be set to true to have any effect
     ## ref: https://docs.datadoghq.com/infrastructure/process/?tab=linuxwindows#process-arguments-scrubbing
-    stripProcessArguments: false
+    stripProcessArguments: true
 
     # datadog.processAgent.processDiscovery -- Enables or disables autodiscovery of integrations
-    processDiscovery: false
+    processDiscovery: true
 
   ## Enable systemProbe agent and provide custom configs
   systemProbe:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
 
     # datadog.systemProbe.debugPort -- Specify the port to expose pprof and expvar for system-probe agent
     debugPort: 0
@@ -156,7 +168,7 @@ datadog:
 
   networkMonitoring:
     # datadog.networkMonitoring.enabled -- Enable network performance monitoring
-    enabled: true
+    enabled: false
 
 
   ## Enable security agent and provide custom configs
@@ -188,9 +200,9 @@ datadog:
   ## ref: https://docs.datadoghq.com/agent/kubernetes/prometheus/
   prometheusScrape:
     # datadog.prometheusScrape.enabled -- Enable autodiscovering pods and services exposing prometheus metrics.
-    enabled: false
+    enabled: true
     # datadog.prometheusScrape.serviceEndpoints -- Enable generating dedicated checks for service endpoints.
-    serviceEndpoints: false
+    serviceEndpoints: true
     # datadog.prometheusScrape.additionalConfigs -- Allows adding advanced openmetrics check configurations with custom discovery rules. (Requires Agent version 7.27+)
     additionalConfigs: []
       # -
@@ -206,6 +218,7 @@ datadog:
       #   - send_distribution_buckets: true
       #     timeout: 5
 
+  containerExcludeLogs: "kube_namespace:logging kube_namespace:argo name:usersync"
 
 ## This is the Datadog Cluster Agent implementation that handles cluster-wide
 ## metrics more cleanly, separates concerns for better rbac, and implements
@@ -221,7 +234,7 @@ clusterAgent:
     name: cluster-agent
 
     # clusterAgent.image.tag -- Cluster Agent image tag to use
-    tag: 1.16.0
+    # tag: 1.16.0
 
     # clusterAgent.image.repository -- Override default registry + image.name for Cluster Agent
     repository:
@@ -278,7 +291,7 @@ agents:
     name: agent
 
     # agents.image.tag -- Define the Agent version to use
-    tag: 7.32.4
+    # tag: 7.32.4
 
     # agents.image.tagSuffix -- Suffix to append to Agent tag
     ## Ex:

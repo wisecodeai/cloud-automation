@@ -10,6 +10,23 @@ spec:
       labels:
         app: gen3job
     spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: karpenter.sh/capacity-type
+                operator: In
+                values:
+                - on-demand
+          - weight: 99
+            preference:
+              matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values:
+                - ONDEMAND
       volumes:
       - name: creds-volume
         secret:
@@ -46,6 +63,11 @@ spec:
           value: 6g
         - name: ETL_FORCED
           GEN3_ETL_FORCED|-value: "TRUE"-|
+        - name: gen3Env
+          valueFrom:
+            configMapKeyRef:
+              name: manifest-global
+              key: hostname
         - name: slackWebHook
           valueFrom:
             configMapKeyRef:

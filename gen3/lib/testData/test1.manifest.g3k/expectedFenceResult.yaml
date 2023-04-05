@@ -35,7 +35,7 @@ spec:
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
+          - weight: 25
             podAffinityTerm:
               labelSelector:
                 matchExpressions:
@@ -44,6 +44,15 @@ spec:
                   values:
                   - fence
               topologyKey: "kubernetes.io/hostname"
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+              - key: eks.amazonaws.com/capacityType
+                operator: In
+                values:
+                - ONDEMAND
       automountServiceAccountToken: false
       volumes:
 # -----------------------------------------------------------------------------
@@ -224,11 +233,10 @@ spec:
             subPath: "jwt-keys.tar"
         resources:
           requests:
-            cpu: 0.4
-            memory: 1200Mi
+            cpu: 100m
+            memory: 500Mi
           limits:
-            cpu: 1.0
-            memory: 2400Mi
+            memory: 1024Mi
         command: ["/bin/bash"]
         args:
           - "-c"
@@ -275,6 +283,7 @@ spec:
             if fence-create migrate --help > /dev/null 2>&1; then
               if ! grep -E 'ENABLE_DB_MIGRATION"?: *false' /var/www/fence/fence-config.yaml; then
                 echo "Running db migration: fence-create migrate"
+                cd /fence
                 fence-create migrate
               else
                 echo "Db migration disabled in fence-config"
