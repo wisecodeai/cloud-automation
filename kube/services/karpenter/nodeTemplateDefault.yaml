@@ -11,6 +11,7 @@ spec:
     karpenter.sh/discovery: VPC_NAME
     Environment: VPC_NAME
     Name: eks-VPC_NAME-karpenter
+    purpose: default
   metadataOptions:
     httpEndpoint: enabled
     httpProtocolIPv6: disabled
@@ -37,7 +38,14 @@ spec:
     # configure grub
     sudo /sbin/grubby --update-kernel=ALL --args="fips=1"
 
+    # --BOUNDARY
+    # Content-Type: text/cloud-config; charset="us-ascii"
+
+    # mounts:
+    #   - ['fstype': 'bpf', 'mountpoint': '/sys/fs/bpf', 'opts': 'rw,relatime']
+
     --BOUNDARY
+
     Content-Type: text/cloud-config; charset="us-ascii"
 
     power_state:

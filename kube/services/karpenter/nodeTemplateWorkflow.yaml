@@ -11,6 +11,7 @@ spec:
     Environment: VPC_NAME
     Name: eks-VPC_NAME-workflow-karpenter
     karpenter.sh/discovery: VPC_NAME
+    purpose: workflow
   metadataOptions:
     httpEndpoint: enabled
     httpProtocolIPv6: disabled
@@ -36,6 +37,12 @@ spec:
     sudo  dracut -f
     # configure grub
     sudo /sbin/grubby --update-kernel=ALL --args="fips=1"
+
+    # --BOUNDARY
+    # Content-Type: text/cloud-config; charset="us-ascii"
+
+    # mounts:
+    #   - ['fstype': 'bpf', 'mountpoint': '/sys/fs/bpf', 'opts': 'rw,relatime']
 
     --BOUNDARY
     Content-Type: text/cloud-config; charset="us-ascii"
